@@ -52,9 +52,7 @@ type AzureDevOps struct {
 }
 
 type GitHub struct {
-	AppID          int64  `json:"appID"`
-	InstallationID int64  `json:"installationID"`
-	PrivateKey     string `json:"privateKey"`
+	Token     string `json:"token"`
 }
 
 type Repository struct {

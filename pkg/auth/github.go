@@ -4,11 +4,10 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"fmt"
-	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/bradleyfalzon/ghinstallation/v2"
+	// "github.com/bradleyfalzon/ghinstallation/v2"
 )
 
 const standardGitHub = "github.com"
@@ -21,11 +20,22 @@ type github struct {
 	itr GitHubTokenSource
 }
 
-func newGithub(appID, installationID int64, privateKey []byte) (*github, error) {
-	itr, err := ghinstallation.New(http.DefaultTransport, appID, installationID, privateKey)
-	if err != nil {
-		return nil, err
+type githubDummyTokenSource struct {
+	token string
+}
+
+func (s githubDummyTokenSource) Token(_ctx context.Context) (string, error) {
+	return s.token, nil
+}
+
+func newGithub(token string) (*github, error) {
+	// itr, err := ghinstallation.New(http.DefaultTransport, appID, installationID, privateKey)
+	itr := githubDummyTokenSource{
+		token: token,
 	}
+	//itr := func (ctx context.Context) (string, error) {
+	//return token, nil
+	//
 	return &github{itr: itr}, nil
 }
 

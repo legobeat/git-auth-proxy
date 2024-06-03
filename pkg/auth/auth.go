@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -38,11 +37,9 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 		case config.AzureDevOpsProviderType:
 			provider = newAzureDevops(o.AzureDevOps.Pat)
 		case config.GitHubProviderType:
-			pemData, err := b64.URLEncoding.DecodeString(o.GitHub.PrivateKey)
-			if err != nil {
-				return nil, err
-			}
-			provider, err = newGithub(o.GitHub.AppID, o.GitHub.InstallationID, pemData)
+			ghToken := o.GitHub.Token
+			var err error
+			provider, err = newGithub(ghToken)
 			if err != nil {
 				return nil, err
 			}
