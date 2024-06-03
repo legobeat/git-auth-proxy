@@ -17,20 +17,18 @@ import (
 	"github.com/go-logr/zapr"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/afero"
-	"github.com/xenitab/pkg/kubernetes"
 	"go.uber.org/zap"
 
 	"github.com/xenitab/git-auth-proxy/pkg/auth"
 	"github.com/xenitab/git-auth-proxy/pkg/config"
 	"github.com/xenitab/git-auth-proxy/pkg/server"
-	"github.com/xenitab/git-auth-proxy/pkg/token"
+	// "github.com/xenitab/git-auth-proxy/pkg/token"
 )
 
 type Arguments struct {
 	Addr           string `arg:"--addr" default:":8080"`
 	MetricsAddr    string `arg:"--metrics-addr" default:":9090"`
 	CfgPath        string `arg:"--config,required"`
-	KubeconfigPath string `arg:"--kubeconfig"`
 }
 
 func main() {
@@ -44,19 +42,15 @@ func main() {
 	log := zapr.NewLogger(zapLog)
 	ctx := logr.NewContext(context.Background(), log)
 
-	if err := run(ctx, args.Addr, args.MetricsAddr, args.CfgPath, args.KubeconfigPath); err != nil {
+	if err := run(ctx, args.Addr, args.MetricsAddr, args.CfgPath); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
 	log.Info("gracefully shutdown")
 }
 
-func run(ctx context.Context, addr, metricsAddr, cfgPath, kubeconfigPath string) error {
+func run(ctx context.Context, addr, metricsAddr, cfgPath string) error {
 	authz, err := getAutorization(cfgPath)
-	if err != nil {
-		return err
-	}
-	client, err := kubernetes.GetKubernetesClientset(kubeconfigPath)
 	if err != nil {
 		return err
 	}
@@ -79,13 +73,13 @@ func run(ctx context.Context, addr, metricsAddr, cfgPath, kubeconfigPath string)
 		return metricsSrv.Shutdown(shutdownCtx)
 	})
 
-	tokenWriter := token.NewTokenWriter(client, authz)
-	g.Go(func() error {
-		if err := tokenWriter.Start(ctx); err != nil {
-			return err
-		}
-		return nil
-	})
+	// tokenWriter := token.NewTokenWriter(client, authz)
+	// g.Go(func() error {
+		// if err := tokenWriter.Start(ctx); err != nil {
+		// 	return err
+		// }
+		// return nil
+	// })
 
 	gp := server.NewGitProxy(authz)
 	proxySrv := gp.Server(ctx, addr)

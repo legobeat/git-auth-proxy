@@ -37,7 +37,7 @@ func TestBasic(t *testing.T) {
 	authz, err := auth.NewAuthorizer(cfg)
 	require.NoError(t, err)
 	client := fake.NewSimpleClientset()
-	tokenWriter := NewTokenWriter(client, authz)
+	tokenWriter := NewTokenWriter(authz)
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 	go func() {
