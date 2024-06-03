@@ -34,11 +34,15 @@ func (g *github) getPathRegex(organization, repository string) ([]*regexp.Regexp
 	if err != nil {
 		return nil, err
 	}
-	api, err := regexp.Compile(fmt.Sprintf(`(?i)/api/v3/(.*)/%s/%s/(/.*)?\b`, organization, repository))
+	api, err := regexp.Compile(fmt.Sprintf(`(?i)/api/v[23]/(.*)/%s/%s/(/.*)?\b`, organization, repository))
 	if err != nil {
 		return nil, err
 	}
-	return []*regexp.Regexp{git, api}, nil
+	repos, err := regexp.Compile(fmt.Sprintf(`(?i)/repos/(.*)/%s/%s/(/.*)?\b`, organization, repository))
+	if err != nil {
+		return nil, err
+	}
+	return []*regexp.Regexp{git, api, repos}, nil
 }
 
 func (g *github) getAuthorizationHeader(ctx context.Context, path string) (string, error) {
@@ -58,7 +62,7 @@ func (g *github) getHost(e *Endpoint, path string) string {
 	if e.host != standardGitHub {
 		return e.host
 	}
-	if strings.HasPrefix(path, "/api/v3/") {
+	if strings.HasPrefix(path, "/api/v3/") || strings.HasPrefix(path, "/repos/") {
 		return fmt.Sprintf("api.%s", e.host)
 	}
 	return e.host
