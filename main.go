@@ -73,14 +73,6 @@ func run(ctx context.Context, addr, metricsAddr, cfgPath string) error {
 		return metricsSrv.Shutdown(shutdownCtx)
 	})
 
-	// tokenWriter := token.NewTokenWriter(client, authz)
-	// g.Go(func() error {
-	// if err := tokenWriter.Start(ctx); err != nil {
-	// 	return err
-	// }
-	// return nil
-	// })
-
 	gp := server.NewGitProxy(authz)
 	proxySrv := gp.Server(ctx, addr)
 	g.Go(func() error {

@@ -6,8 +6,8 @@ config: |
     "organizations": [
       {
         "name": "org",
-        "provider": "azuredevops",
-        "azuredevops": {
+        "provider": "github",
+        "github": {
           "pat": "foobar"
         },
         "host": "test-nginx",
