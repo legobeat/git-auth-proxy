@@ -5,6 +5,9 @@ assets:
 	draw.io -b 10 -x -f png -p 0 -o assets/architecture.png assets/diagram.drawio
 .PHONY: assets
 
+build:
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o git-auth-proxy .
+
 lint:
 	golangci-lint run ./...
 
