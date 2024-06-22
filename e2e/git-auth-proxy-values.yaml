@@ -6,8 +6,12 @@ config: |
     "policies": [
       {
         "provider": "github",
+        "id": "p1",
         "github": {
-          "pat": "foobar"
+          "token": "test-ghtoken"
+        },
+        "userAuth": {
+          "tokenHash": "test-usertokenhash"
         },
         "host": "test-nginx",
         "scheme": "http",
@@ -21,7 +25,6 @@ config: |
             "name": "repo%20space",
             "owner": "org",
             "project": "proj",
-            "secretNameOverride": "foobar"
           }
         ]
       }

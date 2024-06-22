@@ -19,7 +19,6 @@ const (
 
 type Configuration struct {
 	Policies []*Policy `json:"policies" validate:"required,dive"`
-	// Organizations []*Organization `json:"organizations" validate:"required,dive"`
 }
 
 type Policy struct {
@@ -33,15 +32,6 @@ type Policy struct {
 	Repositories []*Repository `json:"repositories" validate:"required,dive"`
 }
 
-// type Organization struct {
-// 	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
-// 	GitHub       GitHub        `json:"github"`
-// 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
-// 	Scheme       string        `json:"scheme,omitempty" validate:"required"`
-// 	Name         string        `json:"name" validate:"required"`
-// 	Repositories []*Repository `json:"repositories" validate:"required,dive"`
-// }
-
 type UserAuth struct {
 	TokenHash string `json:"tokenHash"`
 }
@@ -51,10 +41,8 @@ type GitHub struct {
 }
 
 type Repository struct {
-	Owner              string   `json:"owner"`
-	Name               string   `json:"name" validate:"required"`
-	Namespaces         []string `json:"namespaces" validate:"required"`
-	SecretNameOverride string   `json:"secretNameOverride,omitempty"`
+	Owner string `json:"owner"`
+	Name  string `json:"name" validate:"required"`
 }
 
 func setConfigurationDefaults(cfg *Configuration) *Configuration {
