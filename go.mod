@@ -1,4 +1,4 @@
-module github.com/xenitab/git-auth-proxy
+module github.com/legobeat/git-auth-proxy
 
 go 1.19
 

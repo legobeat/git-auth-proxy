@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/xenitab/git-auth-proxy/pkg/config"
+	"github.com/legobeat/git-auth-proxy/pkg/config"
 )
 
 type Provider interface {
