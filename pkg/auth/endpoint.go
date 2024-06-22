@@ -6,17 +6,15 @@ import (
 )
 
 type Endpoint struct {
-	scheme     string
-	host       string
-	owner      string
-	repository string
-	regexes    []*regexp.Regexp
+	scheme  string
+	host    string
+	id      string
+	regexes []*regexp.Regexp
 
 	TokenHash string
 }
 
 func (e *Endpoint) ID() string {
-	comps := []string{e.host, e.owner}
-	comps = append(comps, e.repository)
+	comps := []string{e.host, e.id}
 	return strings.Join(comps, "-")
 }

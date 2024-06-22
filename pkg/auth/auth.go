@@ -48,12 +48,10 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
 
-
 			e := &Endpoint{
 				host:       p.Host,
 				scheme:     p.Scheme,
-				owner:      r.Owner,
-				repository: r.Name,
+				id:         r.Owner + "//" + r.Name,
 				regexes:    pathRegex,
 				TokenHash:  p.UserAuth.TokenHash,
 				Namespaces: r.Namespaces,
@@ -101,12 +99,15 @@ func (a *Authorizer) GetEndpointByTokenHash(tokenHash string) (*Endpoint, error)
 }
 
 func (a *Authorizer) IsPermitted(path string, token string) error {
+	fmt.Printf("IsPermitted: [%s]: %s\n", path, token)
 	tokenHash := hashToken(token)
 	e, err := a.GetEndpointByTokenHash(tokenHash)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("  IsPermitted2: [%s]: %s\n", path, e.TokenHash)
 	for _, r := range e.regexes {
+		fmt.Printf("    IsPermitted3: [%s]: %s\n", path, r)
 		if r.MatchString(path) {
 			return nil
 		}
