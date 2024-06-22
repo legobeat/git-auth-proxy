@@ -49,7 +49,6 @@ type GitHub struct {
 }
 
 type Repository struct {
-	Project            string   `json:"project"`
 	Owner              string   `json:"owner"`
 	Name               string   `json:"name" validate:"required"`
 	Namespaces         []string `json:"namespaces" validate:"required"`

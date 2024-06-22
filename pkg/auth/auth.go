@@ -11,7 +11,7 @@ import (
 )
 
 type Provider interface {
-	getPathRegex(owner, project, repository string) ([]*regexp.Regexp, error)
+	getPathRegex(owner, repository string) ([]*regexp.Regexp, error)
 	getAuthorizationHeader(ctx context.Context, path string) (string, error)
 	getHost(e *Endpoint, path string) string
 	getPath(e *Endpoint, path string) string
@@ -43,7 +43,7 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 
 		// Create endpoints for the repositories
 		for _, r := range p.Repositories {
-			pathRegex, err := provider.getPathRegex(r.Owner, r.Project, r.Name)
+			pathRegex, err := provider.getPathRegex(r.Owner, r.Name)
 			if err != nil {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
@@ -53,7 +53,6 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				host:       p.Host,
 				scheme:     p.Scheme,
 				owner:      r.Owner,
-				project:    r.Project,
 				repository: r.Name,
 				regexes:    pathRegex,
 				TokenHash:  p.UserAuth.TokenHash,

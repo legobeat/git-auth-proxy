@@ -16,13 +16,11 @@ config: |
             "name": "repo",
             "owner": "org",
             "project": "proj",
-            "namespaces": ["tenant-1", "tenant-2"]
           },
           {
             "name": "repo%20space",
             "owner": "org",
             "project": "proj",
-            "namespaces": ["tenant-1", "tenant-2"],
             "secretNameOverride": "foobar"
           }
         ]

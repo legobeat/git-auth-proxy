@@ -11,14 +11,14 @@ and [ArgoCD](https://github.com/argoproj/argo-cd). These tools need an authentic
   <img src="./assets/architecture.png">
 </p>
 
-Git Auth Proxy attempts to solve this problem by implementing its own authentication and authorization layer in between the client and the Git provider. It works by generating static tokens that are
-specific to a Git repository. These tokens are then written to a Kubernetes secret in the Kubernetes namespaces which should have access to the repositories. When a repository is cloned through the
-proxy, the token will be checked against the repository cloned, and if valid it will be replaced with the correct credentials. The request will be denied if a token is used to clone any other
+Git Auth Proxy attempts to solve this problem by implementing its own authentication and authorization layer in between the client and the Git provider. It works by using static tokens that are
+specific to a Git repository. These tokens are then used by users when interacting with the remote through the proxy. When a repository is cloned through the
+proxy, the token will be checked against the list of policies. If a match is found for the token and the repository cloned, it will be replaced with the correct credentials in the downstream connection. The request will be denied if a token is used to clone any other
 repository which is does not have access to.
 
 ## How To
 
-The proxy reads its configuration from a JSON file. It contains a list of repositories that can be accessed through the proxy and the Kubernetes namespaces which should receive a Secret.
+The proxy reads its configuration from a JSON file. It contains a list of repositories that can be accessed through the proxy.
 
 When using GitHub a GitHub Access Token is used.
 
@@ -28,17 +28,16 @@ When using GitHub a GitHub Access Token is used.
     {
       "provider": "github",
       "github": {
-        "token": "<TOKEN>"
+        "token": "<ACTUAL_GITHUB_TOKEN>"
+      },
+      "userAuth": {
+        "tokenHash": "<HASH_OF_USER_TOKEN>"
       },
       "host": "github.com",
       "repositories": [
         {
           "owner": "yourorg",
-          "name": "fleet-infra",
-          "namespaces": [
-            "foo",
-            "bar"
-          ]
+          "name": "fleet-infra"
         }
       ]
     }

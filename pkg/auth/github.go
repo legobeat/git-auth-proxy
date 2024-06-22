@@ -33,7 +33,7 @@ func newGithub(token string) *github {
 	return &github{itr: itr}
 }
 
-func (g *github) getPathRegex(owner, project, repository string) ([]*regexp.Regexp, error) {
+func (g *github) getPathRegex(owner, repository string) ([]*regexp.Regexp, error) {
 	// Support wildcards
 	if owner == "*" || owner == "" {
 		owner = "[^/]*"

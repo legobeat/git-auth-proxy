@@ -48,8 +48,7 @@ const validGitHub = `
 			"repositories": [
 				{
 					"owner": "example",
-					"name": "gitops-deployment",
-					"namespaces": ["foo"]
+					"name": "gitops-deployment"
 				}
 			]
 		}
@@ -70,5 +69,4 @@ func TestValidGitHub(t *testing.T) {
 	require.Equal(t, "https", cfg.Policies[0].Scheme)
 	require.NotEmpty(t, cfg.Policies[0].Repositories)
 	require.Equal(t, "gitops-deployment", cfg.Policies[0].Repositories[0].Name)
-	require.Equal(t, "", cfg.Policies[0].Repositories[0].Project)
 }

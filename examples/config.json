@@ -1,16 +1,19 @@
 {
-  "organizations": [
+  "policies": [
     {
-      "name": "xenitab",
-      "pat": "foobar",
+      "id": "mypolicy",
+      "provider": "github",
+      "github": {
+        "token": "xxxx"
+      },
+      "userAuth": {
+        "tokenHash": "yyyyy"
+      },
       "repositories": [
         {
+          "owner": "githuborg",
           "name": "fleet-infra",
-          "project": "lab",
-          "namespaces": [
-            "foo",
-            "bar"
-          ]
+          "project": "lab"
         }
       ]
     }
