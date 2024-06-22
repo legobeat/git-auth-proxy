@@ -34,6 +34,14 @@ func newGithub(token string) *github {
 }
 
 func (g *github) getPathRegex(owner, project, repository string) ([]*regexp.Regexp, error) {
+	// Support wildcards
+	if owner == "*" || owner == "" {
+		owner = "[^/]*"
+	}
+	// Support wildcards
+	if repository == "*" || repository == "" {
+		repository = "[^/]*"
+	}
 	git, err := regexp.Compile(fmt.Sprintf(`(?i)/()%s/%s(/.*)?\b`, owner, repository))
 	if err != nil {
 		return nil, err
