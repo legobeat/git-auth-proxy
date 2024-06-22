@@ -41,7 +41,8 @@ func getGitHubAuthorizer() *Authorizer {
 					},
 				},
 				UserAuth: config.UserAuth{
-					TokenHash: "incoming-test-token",
+					TokenHash: "$6$NmUowWy4LgRFWSsY$fOVzziH1IYD84dW8qSHa4X9PSHlo4R52oTx4jzvrR5vWkepDM/sWC.zbgrZ1IZ90zBoUGoEGCLQdbpaMbWtou.",
+					// mkpasswd -m sha512crypt incoming-test-token
 				},
 			},
 		},
@@ -99,8 +100,9 @@ func TestGitHubAuthorization(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			authz := getGitHubAuthorizer()
 			endpoint, err := authz.GetEndpointById("github.com//123")
+			require.NotNil(t, endpoint)
 			require.NoError(t, err)
-			err = authz.IsPermitted(tt.path, endpoint.TokenHash)
+			err = authz.IsPermitted(tt.path, "incoming-test-token")
 
 			if tt.allow {
 				require.NoError(t, err)
