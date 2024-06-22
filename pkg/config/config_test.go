@@ -40,6 +40,7 @@ const validGitHub = `
 {
 	"policies": [
 		{
+			"id": "123",
       "provider": "github",
 			"github": {
         "token": "foobar"

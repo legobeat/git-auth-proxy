@@ -20,6 +20,7 @@ func getGitHubAuthorizer() *Authorizer {
 	cfg := &config.Configuration{
 		Policies: []*config.Policy{
 			{
+				ID:       "123",
 				Provider: config.GitHubProviderType,
 				GitHub: config.GitHub{
 					Token: "test-token",
@@ -97,7 +98,7 @@ func TestGitHubAuthorization(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			authz := getGitHubAuthorizer()
-			endpoint, err := authz.GetEndpointById("github.com-org-repo")
+			endpoint, err := authz.GetEndpointById("github.com//123")
 			require.NoError(t, err)
 			err = authz.IsPermitted(tt.path, endpoint.TokenHash)
 

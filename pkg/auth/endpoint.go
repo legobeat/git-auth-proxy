@@ -16,5 +16,5 @@ type Endpoint struct {
 
 func (e *Endpoint) ID() string {
 	comps := []string{e.host, e.id}
-	return strings.Join(comps, "-")
+	return strings.Join(comps, "//")
 }

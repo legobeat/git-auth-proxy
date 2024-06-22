@@ -41,27 +41,28 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 			return nil, fmt.Errorf("invalid provider type %s", p.Provider)
 		}
 
-		// Create endpoints for the repositories
+		regexes := make([]*regexp.Regexp, 0)
+
+		// Create endpoint for the repositories
 		for _, r := range p.Repositories {
 			pathRegex, err := provider.getPathRegex(r.Owner, r.Name)
 			if err != nil {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
 
-			e := &Endpoint{
-				host:       p.Host,
-				scheme:     p.Scheme,
-				id:         r.Owner + "//" + r.Name,
-				regexes:    pathRegex,
-				TokenHash:  p.UserAuth.TokenHash,
-				Namespaces: r.Namespaces,
-			}
-
-			providers[e.ID()] = provider
-			endpoints = append(endpoints, e)
-			endpointsByID[e.ID()] = e
-			endpointsByTokenHash[p.UserAuth.TokenHash] = e
+			regexes = append(regexes, pathRegex...)
 		}
+		e := &Endpoint{
+			host:      p.Host,
+			scheme:    p.Scheme,
+			id:        p.ID,
+			regexes:   regexes,
+			TokenHash: p.UserAuth.TokenHash,
+		}
+		providers[e.ID()] = provider
+		endpoints = append(endpoints, e)
+		endpointsByID[e.ID()] = e
+		endpointsByTokenHash[p.UserAuth.TokenHash] = e
 	}
 
 	authz := &Authorizer{

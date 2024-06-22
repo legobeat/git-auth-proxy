@@ -23,6 +23,8 @@ type Configuration struct {
 }
 
 type Policy struct {
+	// Just used internally, could be refactored away
+	ID           string        `json:"id" validate:"required"`
 	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
 	GitHub       GitHub        `json:"github"`
 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
