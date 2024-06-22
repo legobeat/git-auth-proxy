@@ -52,7 +52,7 @@ type AzureDevOps struct {
 }
 
 type GitHub struct {
-	Token     string `json:"token"`
+	Token string `json:"token"`
 }
 
 type Repository struct {

@@ -26,12 +26,12 @@ const (
 )
 
 type TokenWriter struct {
-	authz  *auth.Authorizer
+	authz *auth.Authorizer
 }
 
 func NewTokenWriter(authz *auth.Authorizer) *TokenWriter {
 	return &TokenWriter{
-		authz:  authz,
+		authz: authz,
 	}
 }
 
@@ -120,8 +120,8 @@ func (t *TokenWriter) createSecret(ctx context.Context, name string, namespace s
 	//	}
 	// REMOVED: _, err := t.client.CoreV1().Secrets(namespace).Create(ctx, secretObject, metav1.CreateOptions{})
 	// if err != nil {
-		// log.Error(err, "could not create secret", "name", name, "namespace", namespace)
-		// return err
+	// log.Error(err, "could not create secret", "name", name, "namespace", namespace)
+	// return err
 	// }
 	log.Info("created secret", "name", name, "namespace", namespace)
 	return nil

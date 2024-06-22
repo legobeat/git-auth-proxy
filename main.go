@@ -26,9 +26,9 @@ import (
 )
 
 type Arguments struct {
-	Addr           string `arg:"--addr" default:":8080"`
-	MetricsAddr    string `arg:"--metrics-addr" default:":9090"`
-	CfgPath        string `arg:"--config,required"`
+	Addr        string `arg:"--addr" default:":8080"`
+	MetricsAddr string `arg:"--metrics-addr" default:":9090"`
+	CfgPath     string `arg:"--config,required"`
 }
 
 func main() {
@@ -75,10 +75,10 @@ func run(ctx context.Context, addr, metricsAddr, cfgPath string) error {
 
 	// tokenWriter := token.NewTokenWriter(client, authz)
 	// g.Go(func() error {
-		// if err := tokenWriter.Start(ctx); err != nil {
-		// 	return err
-		// }
-		// return nil
+	// if err := tokenWriter.Start(ctx); err != nil {
+	// 	return err
+	// }
+	// return nil
 	// })
 
 	gp := server.NewGitProxy(authz)
