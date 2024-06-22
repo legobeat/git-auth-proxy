@@ -19,9 +19,9 @@ import (
 	"github.com/spf13/afero"
 	"go.uber.org/zap"
 
-	"github.com/xenitab/git-auth-proxy/pkg/auth"
-	"github.com/xenitab/git-auth-proxy/pkg/config"
-	"github.com/xenitab/git-auth-proxy/pkg/server"
+	"github.com/legobeat/git-auth-proxy/pkg/auth"
+	"github.com/legobeat/git-auth-proxy/pkg/config"
+	"github.com/legobeat/git-auth-proxy/pkg/server"
 )
 
 type Arguments struct {
