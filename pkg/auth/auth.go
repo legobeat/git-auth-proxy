@@ -36,11 +36,7 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 		switch o.Provider {
 		case config.GitHubProviderType:
 			ghToken := o.GitHub.Token
-			var err error
-			provider, err = newGithub(ghToken)
-			if err != nil {
-				return nil, err
-			}
+			provider = newGithub(ghToken)
 		default:
 			return nil, fmt.Errorf("invalid provider type %s", o.Provider)
 		}

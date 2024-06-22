@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	// "github.com/bradleyfalzon/ghinstallation/v2"
 )
 
 const standardGitHub = "github.com"
@@ -27,15 +26,11 @@ func (s githubDummyTokenSource) Token(_ctx context.Context) (string, error) {
 	return s.token, nil
 }
 
-func newGithub(token string) (*github, error) {
-	// itr, err := ghinstallation.New(http.DefaultTransport, appID, installationID, privateKey)
+func newGithub(token string) *github {
 	itr := githubDummyTokenSource{
 		token: token,
 	}
-	//itr := func (ctx context.Context) (string, error) {
-	//return token, nil
-	//
-	return &github{itr: itr}, nil
+	return &github{itr: itr}
 }
 
 func (g *github) getPathRegex(organization, project, repository string) ([]*regexp.Regexp, error) {

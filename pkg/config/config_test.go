@@ -57,7 +57,6 @@ const validGitHub = `
 }
 `
 
-//nolint:dupl //false positive
 func TestValidGitHub(t *testing.T) {
 	fs, path, err := fsWithContent(validGitHub)
 	require.NoError(t, err)

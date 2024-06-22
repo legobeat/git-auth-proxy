@@ -22,7 +22,6 @@ import (
 	"github.com/xenitab/git-auth-proxy/pkg/auth"
 	"github.com/xenitab/git-auth-proxy/pkg/config"
 	"github.com/xenitab/git-auth-proxy/pkg/server"
-	// "github.com/xenitab/git-auth-proxy/pkg/token"
 )
 
 type Arguments struct {
