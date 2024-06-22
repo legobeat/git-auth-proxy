@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/legobeat/git-auth-proxy/pkg/config"
+	"github.com/stretchr/testify/require"
 )
 
 type MockGitHubTokenSource struct {
