@@ -26,9 +26,6 @@ run: fmt vet
 docker-build:
 	docker build -t ${IMG} .
 
-kind-load:
-	kind load docker-image $(IMG)
-
 e2e: docker-build kind-load
 	./e2e/e2e.sh $(TAG)
 .PHONY: e2e
