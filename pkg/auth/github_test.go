@@ -18,23 +18,25 @@ func (*MockGitHubTokenSource) Token(ctx context.Context) (string, error) {
 
 func getGitHubAuthorizer() *Authorizer {
 	cfg := &config.Configuration{
-		Organizations: []*config.Organization{
+		Policies: []*config.Policy{
 			{
 				Provider: config.GitHubProviderType,
 				GitHub: config.GitHub{
 					Token: "test-token",
 				},
 				Host: "github.com",
-				Name: "org",
 				Repositories: []*config.Repository{
 					{
-						Name: "repo",
+						Owner: "org",
+						Name:  "repo",
 					},
 					{
-						Name: "foobar",
+						Owner: "org",
+						Name:  "foobar",
 					},
 					{
-						Name: "repo%20space",
+						Owner: "org",
+						Name:  "repo%20space",
 					},
 				},
 			},

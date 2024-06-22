@@ -6,20 +6,19 @@ import (
 )
 
 type Endpoint struct {
-	scheme       string
-	host         string
-	organization string
-	project      string
-	repository   string
-	regexes      []*regexp.Regexp
+	scheme     string
+	host       string
+	owner      string
+	project    string
+	repository string
+	regexes    []*regexp.Regexp
 
 	Token      string
 	Namespaces []string
-	SecretName string
 }
 
 func (e *Endpoint) ID() string {
-	comps := []string{e.host, e.organization}
+	comps := []string{e.host, e.owner}
 	if e.project != "" {
 		comps = append(comps, e.project)
 	}

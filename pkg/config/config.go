@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/afero"
@@ -19,30 +18,30 @@ const (
 )
 
 type Configuration struct {
-	Organizations []*Organization `json:"organizations" validate:"required,dive"`
+	Policies []*Policy `json:"policies" validate:"required,dive"`
+	// Organizations []*Organization `json:"organizations" validate:"required,dive"`
 }
 
-type Organization struct {
+type Policy struct {
 	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
 	GitHub       GitHub        `json:"github"`
 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
 	Scheme       string        `json:"scheme,omitempty" validate:"required"`
-	Name         string        `json:"name" validate:"required"`
+	UserAuth     UserAuth      `json:"userAuth" validate:"required,dive"`
 	Repositories []*Repository `json:"repositories" validate:"required,dive"`
 }
 
-func (o *Organization) GetSecretName(r *Repository) string {
-	if r.SecretNameOverride != "" {
-		return r.SecretNameOverride
-	}
+// type Organization struct {
+// 	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
+// 	GitHub       GitHub        `json:"github"`
+// 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
+// 	Scheme       string        `json:"scheme,omitempty" validate:"required"`
+// 	Name         string        `json:"name" validate:"required"`
+// 	Repositories []*Repository `json:"repositories" validate:"required,dive"`
+// }
 
-	comps := []string{}
-	comps = append(comps, o.Name)
-	if r.Project != "" {
-		comps = append(comps, r.Project)
-	}
-	comps = append(comps, r.Name)
-	return strings.Join(comps, "-")
+type UserAuth struct {
+	Token string `json:"token"`
 }
 
 type GitHub struct {
@@ -51,15 +50,16 @@ type GitHub struct {
 
 type Repository struct {
 	Project            string   `json:"project"`
+	Owner              string   `json:"owner"`
 	Name               string   `json:"name" validate:"required"`
 	Namespaces         []string `json:"namespaces" validate:"required"`
 	SecretNameOverride string   `json:"secretNameOverride,omitempty"`
 }
 
 func setConfigurationDefaults(cfg *Configuration) *Configuration {
-	for i, o := range cfg.Organizations {
-		if o.Scheme == "" {
-			cfg.Organizations[i].Scheme = defaultScheme
+	for i, p := range cfg.Policies {
+		if p.Scheme == "" {
+			cfg.Policies[i].Scheme = defaultScheme
 		}
 	}
 	return cfg

@@ -3,9 +3,8 @@ image:
 
 config: |
   {
-    "organizations": [
+    "policies": [
       {
-        "name": "org",
         "provider": "github",
         "github": {
           "pat": "foobar"
@@ -15,11 +14,13 @@ config: |
         "repositories": [
           {
             "name": "repo",
+            "owner": "org",
             "project": "proj",
             "namespaces": ["tenant-1", "tenant-2"]
           },
           {
             "name": "repo%20space",
+            "owner": "org",
             "project": "proj",
             "namespaces": ["tenant-1", "tenant-2"],
             "secretNameOverride": "foobar"

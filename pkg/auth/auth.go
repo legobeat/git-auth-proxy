@@ -11,7 +11,7 @@ import (
 )
 
 type Provider interface {
-	getPathRegex(organization, project, repository string) ([]*regexp.Regexp, error)
+	getPathRegex(owner, project, repository string) ([]*regexp.Regexp, error)
 	getAuthorizationHeader(ctx context.Context, path string) (string, error)
 	getHost(e *Endpoint, path string) string
 	getPath(e *Endpoint, path string) string
@@ -30,20 +30,20 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 	endpointsByID := map[string]*Endpoint{}
 	endpointsByToken := map[string]*Endpoint{}
 
-	for _, o := range cfg.Organizations {
-		// Get the correct provider for the organization
+	for _, p := range cfg.Policies {
+		// Get the correct provider for the policy
 		var provider Provider
-		switch o.Provider {
+		switch p.Provider {
 		case config.GitHubProviderType:
-			ghToken := o.GitHub.Token
+			ghToken := p.GitHub.Token
 			provider = newGithub(ghToken)
 		default:
-			return nil, fmt.Errorf("invalid provider type %s", o.Provider)
+			return nil, fmt.Errorf("invalid provider type %s", p.Provider)
 		}
 
 		// Create endpoints for the repositories
-		for _, r := range o.Repositories {
-			pathRegex, err := provider.getPathRegex(o.Name, r.Project, r.Name)
+		for _, r := range p.Repositories {
+			pathRegex, err := provider.getPathRegex(r.Owner, r.Project, r.Name)
 			if err != nil {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
@@ -54,15 +54,14 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 			}
 
 			e := &Endpoint{
-				host:         o.Host,
-				scheme:       o.Scheme,
-				organization: o.Name,
-				project:      r.Project,
-				repository:   r.Name,
-				regexes:      pathRegex,
-				Token:        token,
-				Namespaces:   r.Namespaces,
-				SecretName:   o.GetSecretName(r),
+				host:       p.Host,
+				scheme:     p.Scheme,
+				owner:      r.Owner,
+				project:    r.Project,
+				repository: r.Name,
+				regexes:    pathRegex,
+				Token:      token,
+				Namespaces: r.Namespaces,
 			}
 
 			providers[e.ID()] = provider
