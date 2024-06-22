@@ -35,8 +35,6 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 		// Get the correct provider for the organization
 		var provider Provider
 		switch o.Provider {
-		case config.AzureDevOpsProviderType:
-			provider = newAzureDevops(o.AzureDevOps.Pat)
 		case config.GitHubProviderType:
 			pemData, err := b64.URLEncoding.DecodeString(o.GitHub.PrivateKey)
 			if err != nil {
