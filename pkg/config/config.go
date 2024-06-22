@@ -41,7 +41,7 @@ type Policy struct {
 // }
 
 type UserAuth struct {
-	Token string `json:"token"`
+	TokenHash string `json:"tokenHash"`
 }
 
 type GitHub struct {

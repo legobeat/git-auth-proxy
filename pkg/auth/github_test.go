@@ -39,6 +39,9 @@ func getGitHubAuthorizer() *Authorizer {
 						Name:  "repo%20space",
 					},
 				},
+				UserAuth: config.UserAuth{
+					TokenHash: "incoming-test-token",
+				},
 			},
 		},
 	}
@@ -96,7 +99,7 @@ func TestGitHubAuthorization(t *testing.T) {
 			authz := getGitHubAuthorizer()
 			endpoint, err := authz.GetEndpointById("github.com-org-repo")
 			require.NoError(t, err)
-			err = authz.IsPermitted(tt.path, endpoint.Token)
+			err = authz.IsPermitted(tt.path, endpoint.TokenHash)
 
 			if tt.allow {
 				require.NoError(t, err)

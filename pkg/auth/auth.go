@@ -18,17 +18,17 @@ type Provider interface {
 }
 
 type Authorizer struct {
-	providers        map[string]Provider
-	endpoints        []*Endpoint
-	endpointsByID    map[string]*Endpoint
-	endpointsByToken map[string]*Endpoint
+	providers            map[string]Provider
+	endpoints            []*Endpoint
+	endpointsByID        map[string]*Endpoint
+	endpointsByTokenHash map[string]*Endpoint
 }
 
 func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 	providers := map[string]Provider{}
 	endpoints := []*Endpoint{}
 	endpointsByID := map[string]*Endpoint{}
-	endpointsByToken := map[string]*Endpoint{}
+	endpointsByTokenHash := map[string]*Endpoint{}
 
 	for _, p := range cfg.Policies {
 		// Get the correct provider for the policy
@@ -48,10 +48,6 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
 
-			token, err := randomSecureToken()
-			if err != nil {
-				return nil, fmt.Errorf("could not generate random token: %w", err)
-			}
 
 			e := &Endpoint{
 				host:       p.Host,
@@ -60,22 +56,22 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				project:    r.Project,
 				repository: r.Name,
 				regexes:    pathRegex,
-				Token:      token,
+				TokenHash:  p.UserAuth.TokenHash,
 				Namespaces: r.Namespaces,
 			}
 
 			providers[e.ID()] = provider
 			endpoints = append(endpoints, e)
 			endpointsByID[e.ID()] = e
-			endpointsByToken[e.Token] = e
+			endpointsByTokenHash[p.UserAuth.TokenHash] = e
 		}
 	}
 
 	authz := &Authorizer{
-		providers:        providers,
-		endpoints:        endpoints,
-		endpointsByID:    endpointsByID,
-		endpointsByToken: endpointsByToken,
+		providers:            providers,
+		endpoints:            endpoints,
+		endpointsByID:        endpointsByID,
+		endpointsByTokenHash: endpointsByTokenHash,
 	}
 	return authz, nil
 }
@@ -92,8 +88,13 @@ func (a *Authorizer) GetEndpointById(id string) (*Endpoint, error) {
 	return e, nil
 }
 
-func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
-	e, ok := a.endpointsByToken[token]
+func hashToken(token string) string {
+	// TODO
+	return token
+}
+
+func (a *Authorizer) GetEndpointByTokenHash(tokenHash string) (*Endpoint, error) {
+	e, ok := a.endpointsByTokenHash[tokenHash]
 	if !ok {
 		return nil, fmt.Errorf("endpoint not found for given token")
 	}
@@ -101,7 +102,8 @@ func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
 }
 
 func (a *Authorizer) IsPermitted(path string, token string) error {
-	e, err := a.GetEndpointByToken(token)
+	tokenHash := hashToken(token)
+	e, err := a.GetEndpointByTokenHash(tokenHash)
 	if err != nil {
 		return err
 	}
@@ -114,7 +116,8 @@ func (a *Authorizer) IsPermitted(path string, token string) error {
 }
 
 func (a *Authorizer) UpdateRequest(ctx context.Context, req *http.Request, token string) (*http.Request, *url.URL, error) {
-	e, err := a.GetEndpointByToken(token)
+	tokenHash := hashToken(token)
+	e, err := a.GetEndpointByTokenHash(tokenHash)
 	if err != nil {
 		return nil, nil, err
 	}

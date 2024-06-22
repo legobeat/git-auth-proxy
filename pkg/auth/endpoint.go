@@ -13,7 +13,7 @@ type Endpoint struct {
 	repository string
 	regexes    []*regexp.Regexp
 
-	Token      string
+	TokenHash  string
 	Namespaces []string
 }
 
