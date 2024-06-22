@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"regexp"
 
+	"github.com/go-crypt/crypt"
 	"github.com/xenitab/git-auth-proxy/pkg/config"
 )
 
@@ -18,17 +19,17 @@ type Provider interface {
 }
 
 type Authorizer struct {
-	providers            map[string]Provider
-	endpoints            []*Endpoint
-	endpointsByID        map[string]*Endpoint
-	endpointsByTokenHash map[string]*Endpoint
+	providers        map[string]Provider
+	endpoints        []*Endpoint
+	endpointsByID    map[string]*Endpoint
+	endpointsByToken map[string]*Endpoint
 }
 
 func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 	providers := map[string]Provider{}
 	endpoints := []*Endpoint{}
 	endpointsByID := map[string]*Endpoint{}
-	endpointsByTokenHash := map[string]*Endpoint{}
+	endpointsByToken := map[string]*Endpoint{}
 
 	for _, p := range cfg.Policies {
 		// Get the correct provider for the policy
@@ -62,14 +63,14 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 		providers[e.ID()] = provider
 		endpoints = append(endpoints, e)
 		endpointsByID[e.ID()] = e
-		endpointsByTokenHash[p.UserAuth.TokenHash] = e
+		endpointsByToken[p.UserAuth.TokenHash] = e
 	}
 
 	authz := &Authorizer{
-		providers:            providers,
-		endpoints:            endpoints,
-		endpointsByID:        endpointsByID,
-		endpointsByTokenHash: endpointsByTokenHash,
+		providers:        providers,
+		endpoints:        endpoints,
+		endpointsByID:    endpointsByID,
+		endpointsByToken: endpointsByToken,
 	}
 	return authz, nil
 }
@@ -86,29 +87,25 @@ func (a *Authorizer) GetEndpointById(id string) (*Endpoint, error) {
 	return e, nil
 }
 
-func hashToken(token string) string {
-	// TODO
-	return token
-}
-
-func (a *Authorizer) GetEndpointByTokenHash(tokenHash string) (*Endpoint, error) {
-	e, ok := a.endpointsByTokenHash[tokenHash]
-	if !ok {
-		return nil, fmt.Errorf("endpoint not found for given token")
+func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
+	for tokenHash, e := range a.endpointsByToken {
+		valid, err := crypt.CheckPassword(token, tokenHash)
+		if err != nil {
+			panic(err)
+		}
+		if valid {
+			return e, nil
+		}
 	}
-	return e, nil
+	return nil, fmt.Errorf("endpoint not found for given token")
 }
 
 func (a *Authorizer) IsPermitted(path string, token string) error {
-	fmt.Printf("IsPermitted: [%s]: %s\n", path, token)
-	tokenHash := hashToken(token)
-	e, err := a.GetEndpointByTokenHash(tokenHash)
+	e, err := a.GetEndpointByToken(token)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("  IsPermitted2: [%s]: %s\n", path, e.TokenHash)
 	for _, r := range e.regexes {
-		fmt.Printf("    IsPermitted3: [%s]: %s\n", path, r)
 		if r.MatchString(path) {
 			return nil
 		}
@@ -117,8 +114,7 @@ func (a *Authorizer) IsPermitted(path string, token string) error {
 }
 
 func (a *Authorizer) UpdateRequest(ctx context.Context, req *http.Request, token string) (*http.Request, *url.URL, error) {
-	tokenHash := hashToken(token)
-	e, err := a.GetEndpointByTokenHash(tokenHash)
+	e, err := a.GetEndpointByToken(token)
 	if err != nil {
 		return nil, nil, err
 	}
