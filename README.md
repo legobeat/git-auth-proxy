@@ -34,7 +34,7 @@ configured for Git Auth Proxy to append to authorized requests. Note that organi
         "pat": "<PAT>"
       },
       "host": "dev.azure.com",
-      "name": "xenitab",
+      "name": "acme",
       "repositories": [
         {
           "name": "fleet-infra",
@@ -64,7 +64,7 @@ configuration file. Note that the project field is not required when using GitHu
         "privateKey": "<BASE64>"
       },
       "host": "github.com",
-      "name": "xenitab",
+      "name": "acme",
       "repositories": [
         {
           "name": "fleet-infra",
@@ -78,15 +78,6 @@ configuration file. Note that the project field is not required when using GitHu
   ]
 }
 ```
-
-Add the Helm repository and install the chart, be sure to set the config content.
-
-```shell
-kubectl create namespace git-auth-proxy
-helm upgrade --install --version <version> git-auth-proxy oci://ghcr.io/xenitab/helm-charts/git-auth-proxy
-```
-
-There should now be a `git-auth-proxy` Deployment and Service in the cluster, ready to proxy traffic.
 
 ### Git
 

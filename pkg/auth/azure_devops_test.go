@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/xenitab/git-auth-proxy/pkg/config"
+	"github.com/legobeat/git-auth-proxy/pkg/config"
 )
 
 func getAzureDevOpsAuthorizer() *Authorizer {

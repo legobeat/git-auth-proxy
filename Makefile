@@ -1,5 +1,5 @@
 TAG = $$(git rev-parse --short HEAD)
-IMG ?= ghcr.io/xenitab/git-auth-proxy:$(TAG)
+IMG ?= ghcr.io/legobeat/git-auth-proxy:$(TAG)
 
 assets:
 	draw.io -b 10 -x -f png -p 0 -o assets/architecture.png assets/diagram.drawio

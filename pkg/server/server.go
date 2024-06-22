@@ -11,7 +11,7 @@ import (
 	"github.com/go-logr/logr"
 	pkggin "github.com/xenitab/pkg/gin"
 
-	"github.com/xenitab/git-auth-proxy/pkg/auth"
+	"github.com/legobeat/git-auth-proxy/pkg/auth"
 )
 
 type GitProxy struct {
