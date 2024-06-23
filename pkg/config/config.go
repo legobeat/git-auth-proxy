@@ -8,14 +8,12 @@ import (
 )
 
 const (
-	defaultScheme = "https"
+	defaultScheme  = "https"
+	standardGitHub = "github.com"
+	GitHubProviderType = "github"
 )
 
 type ProviderType string
-
-const (
-	GitHubProviderType = "github"
-)
 
 type Configuration struct {
 	Policies []*Policy `json:"policies" validate:"required,dive"`
@@ -49,6 +47,9 @@ func setConfigurationDefaults(cfg *Configuration) *Configuration {
 	for i, p := range cfg.Policies {
 		if p.Scheme == "" {
 			cfg.Policies[i].Scheme = defaultScheme
+		}
+		if p.Provider == GitHubProviderType && p.Host == "" {
+			p.Host = standardGitHub
 		}
 	}
 	return cfg
