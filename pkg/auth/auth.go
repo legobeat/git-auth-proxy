@@ -63,6 +63,8 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 		providers[e.ID()] = provider
 		endpoints = append(endpoints, e)
 		endpointsByID[e.ID()] = e
+		fmt.Printf("ID: '%s'\n", e.ID())
+		fmt.Printf("TH: '%s'\n", e.TokenHash)
 		endpointsByToken[p.UserAuth.TokenHash] = e
 	}
 
@@ -89,6 +91,10 @@ func (a *Authorizer) GetEndpointById(id string) (*Endpoint, error) {
 
 func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
 	for tokenHash, e := range a.endpointsByToken {
+		// empty hash = anon policy. skip CheckPassword.
+		if tokenHash == "" && token == "" {
+			return e, nil
+		}
 		valid, err := crypt.CheckPassword(token, tokenHash)
 		if err != nil {
 			panic(err)
@@ -96,6 +102,9 @@ func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
 		if valid {
 			return e, nil
 		}
+	}
+	if token == "" {
+		return nil, fmt.Errorf("missing basic auth")
 	}
 	return nil, fmt.Errorf("endpoint not found for given token")
 }
