@@ -13,14 +13,14 @@ and [ArgoCD](https://github.com/argoproj/argo-cd). These tools need an authentic
   <img src="./assets/architecture.png">
 </p>
 
-Git Auth Proxy attempts to solve this problem by implementing its own authentication and authorization layer in between the client and the Git provider. It works by generating static tokens that are
-specific to a Git repository. These tokens are then written to a Kubernetes secret in the Kubernetes namespaces which should have access to the repositories. When a repository is cloned through the
-proxy, the token will be checked against the repository cloned, and if valid it will be replaced with the correct credentials. The request will be denied if a token is used to clone any other
+Git Auth Proxy attempts to solve this problem by implementing its own authentication and authorization layer in between the client and the Git provider. It works by using static tokens that are
+specific to a Git repository. These tokens are then used by users when interacting with the remote through the proxy. When a repository is cloned through the
+proxy, the token will be checked against the list of policies. If a match is found for the token and the repository cloned, it will be replaced with the correct credentials in the downstream connection. The request will be denied if a token is used to clone any other
 repository which is does not have access to.
 
 ## How To
 
-The proxy reads its configuration from a JSON file. It contains a list of repositories that can be accessed through the proxy and the Kubernetes namespaces which should receive a Secret.
+The proxy reads its configuration from a JSON file. It contains a list of repositories that can be accessed through the proxy.
 
 When using Azure DevOps a [PAT](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) has to be
 configured for Git Auth Proxy to append to authorized requests. Note that organization and repository names are matched case-insensitive.
@@ -37,8 +37,7 @@ configured for Git Auth Proxy to append to authorized requests. Note that organi
       "name": "acme",
       "repositories": [
         {
-          "name": "fleet-infra",
-          "project": "lab"
+          "name": "fleet-infra"
         }
       ]
     }
@@ -47,7 +46,7 @@ configured for Git Auth Proxy to append to authorized requests. Note that organi
 ```
 
 When using GitHub a [GitHub Application](https://docs.github.com/en/developers/apps) has to be created and installed. The PEM key needs to be extracted and passed as a base64 encoded string in the
-configuration file. Note that the project field is not required when using GitHub as projects do not exists in GitHub.
+configuration file.
 
 ```json
 {
@@ -146,4 +145,3 @@ func main() {
 # License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-

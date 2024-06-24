@@ -12,7 +12,7 @@ import (
 )
 
 type Provider interface {
-	getPathRegex(organization, project, repository string) ([]*regexp.Regexp, error)
+	getPathRegex(organization, repository string) ([]*regexp.Regexp, error)
 	getAuthorizationHeader(ctx context.Context, path string) (string, error)
 	getHost(e *Endpoint, path string) string
 	getPath(e *Endpoint, path string) string
@@ -35,8 +35,6 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 		// Get the correct provider for the organization
 		var provider Provider
 		switch o.Provider {
-		case config.AzureDevOpsProviderType:
-			provider = newAzureDevops(o.AzureDevOps.Pat)
 		case config.GitHubProviderType:
 			pemData, err := b64.URLEncoding.DecodeString(o.GitHub.PrivateKey)
 			if err != nil {
@@ -52,7 +50,7 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 
 		// Create endpoints for the repositories
 		for _, r := range o.Repositories {
-			pathRegex, err := provider.getPathRegex(o.Name, r.Project, r.Name)
+			pathRegex, err := provider.getPathRegex(o.Name, r.Name)
 			if err != nil {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
@@ -66,7 +64,6 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				host:         o.Host,
 				scheme:       o.Scheme,
 				organization: o.Name,
-				project:      r.Project,
 				repository:   r.Name,
 				regexes:      pathRegex,
 				Token:        token,

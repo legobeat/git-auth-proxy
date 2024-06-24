@@ -15,8 +15,7 @@ const (
 type ProviderType string
 
 const (
-	AzureDevOpsProviderType = "azuredevops"
-	GitHubProviderType      = "github"
+	GitHubProviderType = "github"
 )
 
 type Configuration struct {
@@ -24,8 +23,7 @@ type Configuration struct {
 }
 
 type Organization struct {
-	Provider     ProviderType  `json:"provider" validate:"required,oneof='azuredevops' 'github'"`
-	AzureDevOps  AzureDevOps   `json:"azuredevops"`
+	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
 	GitHub       GitHub        `json:"github"`
 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
 	Scheme       string        `json:"scheme,omitempty" validate:"required"`
@@ -39,15 +37,8 @@ func (o *Organization) GetSecretName(r *Repository) string {
 	}
 
 	comps := []string{o.Name}
-	if r.Project != "" {
-		comps = append(comps, r.Project)
-	}
 	comps = append(comps, r.Name)
 	return strings.Join(comps, "-")
-}
-
-type AzureDevOps struct {
-	Pat string `json:"pat"`
 }
 
 type GitHub struct {
@@ -57,7 +48,6 @@ type GitHub struct {
 }
 
 type Repository struct {
-	Project            string `json:"project"`
 	Name               string `json:"name" validate:"required"`
 	SecretNameOverride string `json:"secretNameOverride,omitempty"`
 }

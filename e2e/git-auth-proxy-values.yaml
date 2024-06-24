@@ -6,22 +6,18 @@ config: |
     "organizations": [
       {
         "name": "org",
-        "provider": "azuredevops",
-        "azuredevops": {
+        "provider": "github",
+        "github": {
           "pat": "foobar"
         },
         "host": "test-nginx",
         "scheme": "http",
         "repositories": [
           {
-            "name": "repo",
-            "project": "proj",
-            "namespaces": ["tenant-1", "tenant-2"]
+            "name": "repo"
           },
           {
             "name": "repo%20space",
-            "project": "proj",
-            "namespaces": ["tenant-1", "tenant-2"],
             "secretNameOverride": "foobar"
           }
         ]
