@@ -54,18 +54,25 @@ func (g *github) getPathRegex(owner, repository string) ([]*regexp.Regexp, error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("getPathRegex: [%s/%s]: %s\t%s\t%s\n", owner, repository, git, api, repos)
-	return []*regexp.Regexp{git, api, repos}, nil
+	// static graphql regexp will be duplicated across policies despite being redundant - room for improvement
+	graphql := regexp.MustCompile(`(?i)/graphql/?\b`)
+	if err != nil {
+		return nil, err
+	}
+	return []*regexp.Regexp{git, api, repos, graphql}, nil
 }
 
 func (g *github) getAuthorizationHeader(ctx context.Context, path string) (string, error) {
 	token, err := g.itr.Token(ctx)
 	if err != nil {
-		return "", fmt.Errorf("error when fetching GitHub JWT token: %w", err)
+		return "", fmt.Errorf("error when fetching GitHub token: %w", err)
 	}
 
 	if strings.HasPrefix(path, "/api/v3/") {
 		return fmt.Sprintf("Bearer %s", token), nil
+	}
+	if strings.HasPrefix(path, "/graphql") {
+		return fmt.Sprintf("bearer %s", token), nil
 	}
 	tokenB64 := b64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("x-access-token:%s", token)))
 	return fmt.Sprintf("Basic %s", tokenB64), nil
@@ -75,7 +82,7 @@ func (g *github) getHost(e *Endpoint, path string) string {
 	if e.host != standardGitHub {
 		return e.host
 	}
-	if strings.HasPrefix(path, "/api/v3/") || strings.HasPrefix(path, "/repos/") {
+	if strings.HasPrefix(path, "/api/v3/") || strings.HasPrefix(path, "/repos/") || strings.HasPrefix(path, "/graphql") {
 		return fmt.Sprintf("api.%s", e.host)
 	}
 	return e.host

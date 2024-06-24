@@ -88,10 +88,15 @@ func (a *Authorizer) GetEndpointById(id string) (*Endpoint, error) {
 }
 
 func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
+	var fallbackEndpoint *Endpoint
 	for tokenHash, e := range a.endpointsByToken {
 		// empty hash = anon policy. skip CheckPassword.
-		if tokenHash == "" && token == "" {
-			return e, nil
+		if tokenHash == "" {
+			fallbackEndpoint = e
+			if token == "" {
+				break
+			}
+			continue
 		}
 		valid, err := crypt.CheckPassword(token, tokenHash)
 		if err != nil {
@@ -101,6 +106,36 @@ func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
 			return e, nil
 		}
 	}
+	if fallbackEndpoint != nil {
+		return fallbackEndpoint, nil
+	}
+	if token == "" {
+		return nil, fmt.Errorf("missing basic auth")
+	}
+	return nil, fmt.Errorf("endpoint not found for given token")
+}
+func (a *Authorizer) GetRegexesByToken(token string) ([]*regexp.Regexp, error) {
+	regexes := make([]*regexp.Regexp, 0)
+	for tokenHash, e := range a.endpointsByToken {
+		// empty hash = anon policy. skip CheckPassword.
+		if tokenHash == "" {
+			regexes = append(regexes, e.regexes...)
+			if token == "" {
+				break
+			}
+			continue
+		}
+		valid, err := crypt.CheckPassword(token, tokenHash)
+		if err != nil {
+			panic(err)
+		}
+		if valid {
+			regexes = append(regexes, e.regexes...)
+		}
+	}
+	if len(regexes) > 0 {
+		return regexes, nil
+	}
 	if token == "" {
 		return nil, fmt.Errorf("missing basic auth")
 	}
@@ -108,11 +143,11 @@ func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
 }
 
 func (a *Authorizer) IsPermitted(path string, token string) error {
-	e, err := a.GetEndpointByToken(token)
+	regexes, err := a.GetRegexesByToken(token)
 	if err != nil {
 		return err
 	}
-	for _, r := range e.regexes {
+	for _, r := range regexes {
 		if r.MatchString(path) {
 			return nil
 		}
