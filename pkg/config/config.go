@@ -2,60 +2,54 @@ package config
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/afero"
 )
 
 const (
-	defaultScheme = "https"
+	defaultScheme      = "https"
+	standardGitHub     = "github.com"
+	GitHubProviderType = "github"
 )
 
 type ProviderType string
 
-const (
-	GitHubProviderType = "github"
-)
-
 type Configuration struct {
-	Organizations []*Organization `json:"organizations" validate:"required,dive"`
+	Policies []*Policy `json:"policies" validate:"required,dive"`
 }
 
-type Organization struct {
+type Policy struct {
+	// Just used internally, could be refactored away
+	ID           string        `json:"id" validate:"required"`
 	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
 	GitHub       GitHub        `json:"github"`
 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
 	Scheme       string        `json:"scheme,omitempty" validate:"required"`
-	Name         string        `json:"name" validate:"required"`
+	UserAuth     UserAuth      `json:"userAuth" validate:"required,dive"`
 	Repositories []*Repository `json:"repositories" validate:"required,dive"`
 }
 
-func (o *Organization) GetSecretName(r *Repository) string {
-	if r.SecretNameOverride != "" {
-		return r.SecretNameOverride
-	}
-
-	comps := []string{o.Name}
-	comps = append(comps, r.Name)
-	return strings.Join(comps, "-")
+type UserAuth struct {
+	TokenHash string `json:"tokenHash"`
 }
 
 type GitHub struct {
-	AppID          int64  `json:"appID"`
-	InstallationID int64  `json:"installationID"`
-	PrivateKey     string `json:"privateKey"`
+	Token string `json:"token"`
 }
 
 type Repository struct {
-	Name               string `json:"name" validate:"required"`
-	SecretNameOverride string `json:"secretNameOverride,omitempty"`
+	Owner string `json:"owner"`
+	Name  string `json:"name" validate:"required"`
 }
 
 func setConfigurationDefaults(cfg *Configuration) *Configuration {
-	for i, o := range cfg.Organizations {
-		if o.Scheme == "" {
-			cfg.Organizations[i].Scheme = defaultScheme
+	for i, p := range cfg.Policies {
+		if p.Scheme == "" {
+			cfg.Policies[i].Scheme = defaultScheme
+		}
+		if p.Provider == GitHubProviderType && p.Host == "" {
+			p.Host = standardGitHub
 		}
 	}
 	return cfg

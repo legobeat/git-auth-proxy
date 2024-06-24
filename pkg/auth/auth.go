@@ -2,17 +2,17 @@ package auth
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
 	"regexp"
 
+	"github.com/go-crypt/crypt"
 	"github.com/legobeat/git-auth-proxy/pkg/config"
 )
 
 type Provider interface {
-	getPathRegex(organization, repository string) ([]*regexp.Regexp, error)
+	getPathRegex(owner, repository string) ([]*regexp.Regexp, error)
 	getAuthorizationHeader(ctx context.Context, path string) (string, error)
 	getHost(e *Endpoint, path string) string
 	getPath(e *Endpoint, path string) string
@@ -31,50 +31,39 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 	endpointsByID := map[string]*Endpoint{}
 	endpointsByToken := map[string]*Endpoint{}
 
-	for _, o := range cfg.Organizations {
-		// Get the correct provider for the organization
+	for _, p := range cfg.Policies {
+		// Get the correct provider for the policy
 		var provider Provider
-		switch o.Provider {
+		switch p.Provider {
 		case config.GitHubProviderType:
-			pemData, err := b64.URLEncoding.DecodeString(o.GitHub.PrivateKey)
-			if err != nil {
-				return nil, err
-			}
-			provider, err = newGithub(o.GitHub.AppID, o.GitHub.InstallationID, pemData)
-			if err != nil {
-				return nil, err
-			}
+			ghToken := p.GitHub.Token
+			provider = newGithub(ghToken)
 		default:
-			return nil, fmt.Errorf("invalid provider type %s", o.Provider)
+			return nil, fmt.Errorf("invalid provider type %s", p.Provider)
 		}
 
-		// Create endpoints for the repositories
-		for _, r := range o.Repositories {
-			pathRegex, err := provider.getPathRegex(o.Name, r.Name)
+		regexes := make([]*regexp.Regexp, 0)
+
+		// Create endpoint for the repositories
+		for _, r := range p.Repositories {
+			pathRegex, err := provider.getPathRegex(r.Owner, r.Name)
 			if err != nil {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
 
-			token, err := randomSecureToken()
-			if err != nil {
-				return nil, fmt.Errorf("could not generate random token: %w", err)
-			}
-
-			e := &Endpoint{
-				host:         o.Host,
-				scheme:       o.Scheme,
-				organization: o.Name,
-				repository:   r.Name,
-				regexes:      pathRegex,
-				Token:        token,
-				SecretName:   o.GetSecretName(r),
-			}
-
-			providers[e.ID()] = provider
-			endpoints = append(endpoints, e)
-			endpointsByID[e.ID()] = e
-			endpointsByToken[e.Token] = e
+			regexes = append(regexes, pathRegex...)
 		}
+		e := &Endpoint{
+			host:      p.Host,
+			scheme:    p.Scheme,
+			id:        p.ID,
+			regexes:   regexes,
+			TokenHash: p.UserAuth.TokenHash,
+		}
+		providers[e.ID()] = provider
+		endpoints = append(endpoints, e)
+		endpointsByID[e.ID()] = e
+		endpointsByToken[p.UserAuth.TokenHash] = e
 	}
 
 	authz := &Authorizer{
@@ -99,19 +88,69 @@ func (a *Authorizer) GetEndpointById(id string) (*Endpoint, error) {
 }
 
 func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
-	e, ok := a.endpointsByToken[token]
-	if !ok {
-		return nil, fmt.Errorf("endpoint not found for given token")
+	var fallbackEndpoint *Endpoint
+	for tokenHash, e := range a.endpointsByToken {
+		// empty hash = anon policy. skip CheckPassword.
+		if tokenHash == "" {
+			fallbackEndpoint = e
+			if token == "" {
+				break
+			}
+			continue
+		}
+		valid, err := crypt.CheckPassword(token, tokenHash)
+		if err != nil {
+			panic(err)
+		}
+		if valid {
+			return e, nil
+		}
 	}
-	return e, nil
+	if fallbackEndpoint != nil {
+		return fallbackEndpoint, nil
+	}
+	if token == "" {
+		return nil, fmt.Errorf("missing basic auth")
+	}
+	return nil, fmt.Errorf("endpoint not found for given token")
+}
+func (a *Authorizer) GetRegexesByToken(token string) ([]*regexp.Regexp, error) {
+	regexes := make([]*regexp.Regexp, 0)
+	for tokenHash, e := range a.endpointsByToken {
+		// empty hash = anon policy. skip CheckPassword.
+		if tokenHash == "" {
+			regexes = append(regexes, e.regexes...)
+			if token == "" {
+				break
+			}
+			continue
+		}
+		valid, err := crypt.CheckPassword(token, tokenHash)
+		if err != nil {
+			panic(err)
+		}
+		if valid {
+			regexes = append(regexes, e.regexes...)
+		}
+	}
+	if len(regexes) > 0 {
+		return regexes, nil
+	}
+	if token == "" {
+		return nil, fmt.Errorf("missing basic auth")
+	}
+	return nil, fmt.Errorf("endpoint not found for given token")
 }
 
 func (a *Authorizer) IsPermitted(path string, token string) error {
-	e, err := a.GetEndpointByToken(token)
+	regexes, err := a.GetRegexesByToken(token)
 	if err != nil {
 		return err
 	}
-	for _, r := range e.regexes {
+	if path == "/" && len(regexes) > 0 {
+		return nil
+	}
+	for _, r := range regexes {
 		if r.MatchString(path) {
 			return nil
 		}

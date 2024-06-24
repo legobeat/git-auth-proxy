@@ -40,12 +40,9 @@ func (g *GitProxy) Server(ctx context.Context, addr string) *http.Server {
 
 func (g *GitProxy) proxyHandler(c *gin.Context) {
 	// Get the token from the request
+	// error is fine; we fall back to "", the default public policy, if any
+	//nolint: ineffassign,staticcheck //ignore
 	token, err := getTokenFromRequest(c.Request)
-	if err != nil {
-		c.Header("WWW-Authenticate", "Basic realm=\"Restricted\"")
-		c.String(http.StatusUnauthorized, "Missing basic authentication")
-		return
-	}
 	// Check basic auth with local auth configuration
 	err = g.authz.IsPermitted(c.Request.URL.EscapedPath(), token)
 	if err != nil {

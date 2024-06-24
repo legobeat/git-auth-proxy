@@ -1,18 +1,18 @@
 {
   "policies": [
     {
-      "id": "mypolicy",
+      "id": "default",
       "provider": "github",
       "github": {
-        "token": "xxxx"
+        "token": ""
       },
       "userAuth": {
-        "tokenHash": "yyyyy"
+        "tokenHash": ""
       },
       "repositories": [
         {
-          "owner": "githuborg",
-          "name": "fleet-infra"
+          "owner": "*",
+          "name": "*"
         }
       ]
     }

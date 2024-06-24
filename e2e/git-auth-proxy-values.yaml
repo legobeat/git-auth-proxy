@@ -3,22 +3,26 @@ image:
 
 config: |
   {
-    "organizations": [
+    "policies": [
       {
-        "name": "org",
         "provider": "github",
+        "id": "p1",
         "github": {
-          "pat": "foobar"
+          "token": "test-ghtoken"
+        },
+        "userAuth": {
+          "tokenHash": "test-usertokenhash"
         },
         "host": "test-nginx",
         "scheme": "http",
         "repositories": [
           {
-            "name": "repo"
+            "name": "repo",
+            "owner": "org"
           },
           {
             "name": "repo%20space",
-            "secretNameOverride": "foobar"
+            "owner": "org"
           }
         ]
       }

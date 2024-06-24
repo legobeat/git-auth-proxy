@@ -38,18 +38,17 @@ func TestInvalidJson(t *testing.T) {
 
 const validGitHub = `
 {
-	"organizations": [
+	"policies": [
 		{
+			"id": "123",
       "provider": "github",
 			"github": {
-        "appID": 123,
-        "installationID": 123,
-        "privateKey": "foobar"
+        "token": "foobar"
       },
 			"host": "github.com",
-			"name": "xenitab",
 			"repositories": [
 				{
+					"owner": "example",
 					"name": "gitops-deployment"
 				}
 			]
@@ -64,14 +63,12 @@ func TestValidGitHub(t *testing.T) {
 	cfg, err := LoadConfiguration(fs, path)
 	require.NoError(t, err)
 
-	require.NotEmpty(t, cfg.Organizations)
-	require.Equal(t, "github", string(cfg.Organizations[0].Provider))
-	require.Equal(t, int64(123), cfg.Organizations[0].GitHub.AppID)
-	require.Equal(t, int64(123), cfg.Organizations[0].GitHub.InstallationID)
-	require.Equal(t, "foobar", cfg.Organizations[0].GitHub.PrivateKey)
-	require.Equal(t, "github.com", cfg.Organizations[0].Host)
-	require.Equal(t, "https", cfg.Organizations[0].Scheme)
-	require.Equal(t, "xenitab", cfg.Organizations[0].Name)
-	require.NotEmpty(t, cfg.Organizations[0].Repositories)
-	require.Equal(t, "gitops-deployment", cfg.Organizations[0].Repositories[0].Name)
+	require.NotEmpty(t, cfg.Policies)
+	require.Equal(t, "github", string(cfg.Policies[0].Provider))
+	require.Equal(t, "foobar", cfg.Policies[0].GitHub.Token)
+	require.Equal(t, "github.com", cfg.Policies[0].Host)
+	require.Equal(t, "https", cfg.Policies[0].Scheme)
+	require.NotEmpty(t, cfg.Policies[0].Repositories)
+	require.Equal(t, "gitops-deployment", cfg.Policies[0].Repositories[0].Name)
+	require.Equal(t, "example", cfg.Policies[0].Repositories[0].Owner)
 }
