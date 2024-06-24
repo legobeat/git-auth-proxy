@@ -115,6 +115,11 @@ func TestGitHubMixedAuthorization(t *testing.T) {
 		allow bool
 	}{
 		{
+			name:  "allow root",
+			path:  "/",
+			allow: true,
+		},
+		{
 			name:  "allow repo",
 			path:  "/org/repo",
 			allow: true,
@@ -178,6 +183,11 @@ func TestGitHubAuthorization(t *testing.T) {
 		path  string
 		allow bool
 	}{
+		{
+			name:  "allow root",
+			path:  "/",
+			allow: true,
+		},
 		{
 			name:  "allow repo",
 			path:  "/org/repo",
