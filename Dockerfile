@@ -1,7 +1,11 @@
 FROM golang:1.22 as builder
 RUN mkdir /build
-ADD . /build/
 WORKDIR /build
+ARG GOPROXY="https://goproxy.io,https://proxy.golang.org,direct"
+ENV GOPROXY=$GOPROXY
+ADD go.mod go.sum .
+RUN go get ./...
+ADD . /build/
 RUN make build
 
 FROM gcr.io/distroless/static:nonroot
