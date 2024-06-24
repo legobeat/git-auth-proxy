@@ -46,6 +46,7 @@ func (g *github) getPathRegex(owner, repository string) ([]*regexp.Regexp, error
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("getPathRegex: [%s/%s]: %s\t%s\t%s\n", owner, repository, git, api, repos)
 	return []*regexp.Regexp{git, api, repos}, nil
 }
 
