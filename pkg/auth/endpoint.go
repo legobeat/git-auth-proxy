@@ -14,7 +14,6 @@ type Endpoint struct {
 	regexes      []*regexp.Regexp
 
 	Token      string
-	Namespaces []string
 	SecretName string
 }
 

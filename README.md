@@ -38,11 +38,7 @@ configured for Git Auth Proxy to append to authorized requests. Note that organi
       "repositories": [
         {
           "name": "fleet-infra",
-          "project": "lab",
-          "namespaces": [
-            "foo",
-            "bar"
-          ]
+          "project": "lab"
         }
       ]
     }
@@ -67,11 +63,7 @@ configuration file. Note that the project field is not required when using GitHu
       "name": "acme",
       "repositories": [
         {
-          "name": "fleet-infra",
-          "namespaces": [
-            "foo",
-            "bar"
-          ]
+          "name": "fleet-infra"
         }
       ]
     }
