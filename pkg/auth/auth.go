@@ -147,6 +147,9 @@ func (a *Authorizer) IsPermitted(path string, token string) error {
 	if err != nil {
 		return err
 	}
+	if path == "/" && len(regexes) > 0 {
+		return nil
+	}
 	for _, r := range regexes {
 		if r.MatchString(path) {
 			return nil
