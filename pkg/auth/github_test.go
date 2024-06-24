@@ -16,7 +16,7 @@ func (*MockGitHubTokenSource) Token(ctx context.Context) (string, error) {
 	return "foo", nil
 }
 
-func getGitHubAuthorizer() *Authorizer {
+func getGitHubAuthorizerSingle() *Authorizer {
 	cfg := &config.Configuration{
 		Policies: []*config.Policy{
 			{
@@ -54,6 +54,124 @@ func getGitHubAuthorizer() *Authorizer {
 	return auth
 }
 
+func getGitHubAuthorizerMixed() *Authorizer {
+	cfg := &config.Configuration{
+		Policies: []*config.Policy{
+			{
+				ID:       "private",
+				Provider: config.GitHubProviderType,
+				GitHub: config.GitHub{
+					Token: "test-token",
+				},
+				Host: "github.com",
+				Repositories: []*config.Repository{
+					{
+						Owner: "org",
+						Name:  "repo",
+					},
+					{
+						Owner: "org",
+						Name:  "foobar",
+					},
+					{
+						Owner: "org",
+						Name:  "repo%20space",
+					},
+				},
+				UserAuth: config.UserAuth{
+					TokenHash: "$6$SuRwqTHhR/k4axcK$4THoTcwS75DCmwQ5YRC8sWoD0g/pXSHxa0fam00TsOE.6UNMUa0N9.XTcWtH6171MM.BRV7QMomEwBdh57GfN1",
+				},
+			},
+			{
+				ID:       "public",
+				Provider: config.GitHubProviderType,
+				GitHub: config.GitHub{
+					Token: "",
+				},
+				Host: "github.com",
+				Repositories: []*config.Repository{
+					{
+						Owner: "*",
+						Name:  "*",
+					},
+				},
+				UserAuth: config.UserAuth{
+					TokenHash: "",
+				},
+			},
+		},
+	}
+	auth, err := NewAuthorizer(cfg)
+	if err != nil {
+		panic(err)
+	}
+	return auth
+}
+
+func TestGitHubMixedAuthorization(t *testing.T) {
+	tests := []struct {
+		name  string
+		path  string
+		allow bool
+	}{
+		{
+			name:  "allow repo",
+			path:  "/org/repo",
+			allow: true,
+		},
+		{
+			name:  "allow repo",
+			path:  "/Org/repO",
+			allow: true,
+		},
+		{
+			name:  "allow api",
+			path:  "/api/v3/org/repo",
+			allow: true,
+		},
+		{
+			name:  "allow graphql",
+			path:  "/graphql",
+			allow: true,
+		},
+		{
+			name:  "allow catchall repo",
+			path:  "/org/foo",
+			allow: true,
+		},
+		{
+			name:  "allow catchall repo in api",
+			path:  "/api/v3/org/foo",
+			allow: true,
+		},
+		{
+			name:  "allow catchall org",
+			path:  "/foo/repo",
+			allow: true,
+		},
+		{
+			name:  "allow catchall org in api",
+			path:  "/api/v3/foo/repo",
+			allow: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			authz := getGitHubAuthorizerMixed()
+			endpoint, err := authz.GetEndpointById("github.com//private")
+			require.NotNil(t, endpoint)
+			require.NoError(t, err)
+			err = authz.IsPermitted(tt.path, "private-test-token")
+
+			if tt.allow {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
+}
+
 func TestGitHubAuthorization(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -76,12 +194,17 @@ func TestGitHubAuthorization(t *testing.T) {
 			allow: true,
 		},
 		{
+			name:  "allow graphql",
+			path:  "/graphql",
+			allow: true,
+		},
+		{
 			name:  "disallow wrong repo",
 			path:  "/org/foo",
 			allow: false,
 		},
 		{
-			name:  "disallow wront repo in api",
+			name:  "disallow wrong repo in api",
 			path:  "/api/v3/org/foo",
 			allow: false,
 		},
@@ -91,14 +214,14 @@ func TestGitHubAuthorization(t *testing.T) {
 			allow: false,
 		},
 		{
-			name:  "disallow wront org in api",
+			name:  "disallow wrong org in api",
 			path:  "/api/v3/foo/repo",
 			allow: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			authz := getGitHubAuthorizer()
+			authz := getGitHubAuthorizerSingle()
 			endpoint, err := authz.GetEndpointById("github.com//123")
 			require.NotNil(t, endpoint)
 			require.NoError(t, err)
@@ -118,6 +241,13 @@ func TestGithubApiGetAuthorization(t *testing.T) {
 	authorization, err := gh.getAuthorizationHeader(context.TODO(), "/api/v3/test")
 	require.NoError(t, err)
 	require.Equal(t, "Bearer foo", authorization)
+}
+
+func TestGithubGraphqlGetAuthorization(t *testing.T) {
+	gh := &github{itr: &MockGitHubTokenSource{}}
+	authorization, err := gh.getAuthorizationHeader(context.TODO(), "/graphql")
+	require.NoError(t, err)
+	require.Equal(t, "bearer foo", authorization)
 }
 
 func TestGithubGitGetAuthorization(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -11,6 +12,7 @@ const (
 	headerKey = "Authorization"
 	basicKey  = "Basic "
 	bearerKey = "Bearer "
+	tokenKey  = "Token "
 )
 
 func getTokenFromRequest(req *http.Request) (string, error) {
@@ -43,11 +45,15 @@ func getTokenFromRequest(req *http.Request) (string, error) {
 }
 
 func extractEncodedToken(value string) (string, bool, error) {
-	if strings.HasPrefix(value, basicKey) {
-		return strings.TrimPrefix(value, basicKey), false, nil
+	var re = regexp.MustCompile(`(?i)^\s*(Basic) `)
+	if re.MatchString(value) {
+		token := re.ReplaceAllString(value, "")
+		return token, false, nil
 	}
-	if strings.HasPrefix(value, bearerKey) {
-		return strings.TrimPrefix(value, bearerKey), true, nil
+	re = regexp.MustCompile(`(?i)^\s*(Basic|Bearer|Token) `)
+	if re.MatchString(value) {
+		token := re.ReplaceAllString(value, "")
+		return token, true, nil
 	}
-	return "", false, fmt.Errorf("Missing either %s or %s", basicKey, bearerKey)
+	return "", false, fmt.Errorf("Missing either %s, %s or %s", basicKey, bearerKey, tokenKey)
 }
