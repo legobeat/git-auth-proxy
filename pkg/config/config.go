@@ -18,16 +18,15 @@ const (
 )
 
 type Configuration struct {
-	Organizations []*Organization `json:"organizations" validate:"required,dive"`
+	Policies []*Policy `json:"policies" validate:"required,dive"`
 }
 
-type Organization struct {
+type Policy struct {
 	Provider     ProviderType  `json:"provider" validate:"required,oneof='forgejo' 'github'"`
 	GitHub       GitHub        `json:"github"`
 	Host         string        `json:"host,omitempty" validate:"required,hostname"`
 	Scheme       string        `json:"scheme,omitempty" validate:"required"`
 	UserAuth     UserAuth      `json:"userAuth" validate:"required,dive"`
-	Name         string        `json:"name" validate:"required"`
 	Repositories []*Repository `json:"repositories" validate:"required,dive"`
 }
 
@@ -45,9 +44,9 @@ type Repository struct {
 }
 
 func setConfigurationDefaults(cfg *Configuration) *Configuration {
-	for i, p := range cfg.Organizations {
+	for i, p := range cfg.Policies {
 		if p.Scheme == "" {
-			cfg.Organizations[i].Scheme = defaultScheme
+			cfg.Policies[i].Scheme = defaultScheme
 		}
 	}
 	return cfg

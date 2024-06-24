@@ -11,7 +11,7 @@ import (
 )
 
 type Provider interface {
-	getPathRegex(organization, repository string) ([]*regexp.Regexp, error)
+	getPathRegex(owner, repository string) ([]*regexp.Regexp, error)
 	getAuthorizationHeader(ctx context.Context, path string) (string, error)
 	getHost(e *Endpoint, path string) string
 	getPath(e *Endpoint, path string) string
@@ -30,37 +30,37 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 	endpointsByID := map[string]*Endpoint{}
 	endpointsByTokenHash := map[string]*Endpoint{}
 
-	for _, o := range cfg.Organizations {
-		// Get the correct provider for the organization
+	for _, p := range cfg.Policies {
+		// Get the correct provider for the policy
 		var provider Provider
-		switch o.Provider {
+		switch p.Provider {
 		case config.GitHubProviderType:
-			ghToken := o.GitHub.Token
+			ghToken := p.GitHub.Token
 			provider = newGithub(ghToken)
 		default:
-			return nil, fmt.Errorf("invalid provider type %s", o.Provider)
+			return nil, fmt.Errorf("invalid provider type %s", p.Provider)
 		}
 
 		// Create endpoints for the repositories
-		for _, r := range o.Repositories {
-			pathRegex, err := provider.getPathRegex(o.Name, r.Name)
+		for _, r := range p.Repositories {
+			pathRegex, err := provider.getPathRegex(r.Owner, r.Name)
 			if err != nil {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
 
 			e := &Endpoint{
-				host:         o.Host,
-				scheme:       o.Scheme,
-				organization: o.Name,
-				repository:   r.Name,
-				regexes:      pathRegex,
-				TokenHash:    o.UserAuth.TokenHash,
+				host:       p.Host,
+				scheme:     p.Scheme,
+				owner:      r.Owner,
+				repository: r.Name,
+				regexes:    pathRegex,
+				TokenHash:  p.UserAuth.TokenHash,
 			}
 
 			providers[e.ID()] = provider
 			endpoints = append(endpoints, e)
 			endpointsByID[e.ID()] = e
-			endpointsByTokenHash[o.UserAuth.TokenHash] = e
+			endpointsByTokenHash[p.UserAuth.TokenHash] = e
 		}
 	}
 

@@ -3,9 +3,8 @@ image:
 
 config: |
   {
-    "organizations": [
+    "policies": [
       {
-        "name": "org",
         "provider": "github",
         "id": "p1",
         "github": {
@@ -18,10 +17,12 @@ config: |
         "scheme": "http",
         "repositories": [
           {
-            "name": "repo"
+            "name": "repo",
+            "owner": "org"
           },
           {
             "name": "repo%20space",
+            "owner": "org"
           }
         ]
       }

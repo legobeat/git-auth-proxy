@@ -33,16 +33,16 @@ func newGithub(token string) *github {
 	return &github{itr: itr}
 }
 
-func (g *github) getPathRegex(organization, repository string) ([]*regexp.Regexp, error) {
-	git, err := regexp.Compile(fmt.Sprintf(`(?i)/%s/%s(/.*)?\b`, organization, repository))
+func (g *github) getPathRegex(owner, repository string) ([]*regexp.Regexp, error) {
+	git, err := regexp.Compile(fmt.Sprintf(`(?i)/%s/%s(/.*)?\b`, owner, repository))
 	if err != nil {
 		return nil, err
 	}
-	api, err := regexp.Compile(fmt.Sprintf(`(?i)/api/v[23]/(.*)/%s/%s/(/.*)?\b`, organization, repository))
+	api, err := regexp.Compile(fmt.Sprintf(`(?i)/api/v[23]/(.*)/%s/%s/(/.*)?\b`, owner, repository))
 	if err != nil {
 		return nil, err
 	}
-	repos, err := regexp.Compile(fmt.Sprintf(`(?i)/repos/(.*)/%s/%s/(/.*)?\b`, organization, repository))
+	repos, err := regexp.Compile(fmt.Sprintf(`(?i)/repos/(.*)/%s/%s/(/.*)?\b`, owner, repository))
 	if err != nil {
 		return nil, err
 	}
