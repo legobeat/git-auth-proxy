@@ -1,6 +1,6 @@
 module github.com/legobeat/git-auth-proxy
 
-go 1.19
+go 1.22
 
 require (
 	github.com/alexflint/go-arg v1.4.3
