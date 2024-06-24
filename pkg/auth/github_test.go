@@ -108,6 +108,7 @@ func getGitHubAuthorizerMixed() *Authorizer {
 	return auth
 }
 
+// nolint: dupl,nolintlint //ignore
 func TestGitHubMixedAuthorization(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -177,6 +178,7 @@ func TestGitHubMixedAuthorization(t *testing.T) {
 	}
 }
 
+// nolint: dupl,nolintlint //ignore
 func TestGitHubAuthorization(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -351,6 +353,39 @@ func TestGetPath(t *testing.T) {
 			}
 			path := gh.getPath(e, tt.path)
 			require.Equal(t, tt.expected, path)
+		})
+	}
+}
+
+func TestGetEndpointByToken(t *testing.T) {
+	tests := []struct {
+		name       string
+		token      string
+		expectedId string
+	}{
+		{
+			name:       "valid token: private endpoints",
+			token:      "private-test-token",
+			expectedId: "github.com//private",
+		},
+		{
+			name:       "invalid token: public endpoints",
+			token:      "invalid-token",
+			expectedId: "github.com//public",
+		},
+		{
+			name:       "no token: public endpoints",
+			token:      "",
+			expectedId: "github.com//public",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			authz := getGitHubAuthorizerMixed()
+			endpoint, err := authz.GetEndpointByToken(tt.token)
+			require.NotNil(t, endpoint)
+			require.NoError(t, err)
+			require.Equal(t, tt.expectedId, endpoint.ID())
 		})
 	}
 }

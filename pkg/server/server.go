@@ -41,7 +41,7 @@ func (g *GitProxy) Server(ctx context.Context, addr string) *http.Server {
 func (g *GitProxy) proxyHandler(c *gin.Context) {
 	// Get the token from the request
 	// error is fine; we fall back to "", the default public policy, if any
-	//nolint: ineffassign //ignore
+	//nolint: ineffassign,staticcheck //ignore
 	token, err := getTokenFromRequest(c.Request)
 	// Check basic auth with local auth configuration
 	err = g.authz.IsPermitted(c.Request.URL.EscapedPath(), token)
