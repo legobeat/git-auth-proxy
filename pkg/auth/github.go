@@ -29,7 +29,7 @@ func newGithub(appID, installationID int64, privateKey []byte) (*github, error) 
 	return &github{itr: itr}, nil
 }
 
-func (g *github) getPathRegex(organization, project, repository string) ([]*regexp.Regexp, error) {
+func (g *github) getPathRegex(organization, repository string) ([]*regexp.Regexp, error) {
 	git, err := regexp.Compile(fmt.Sprintf(`(?i)/%s/%s(/.*)?\b`, organization, repository))
 	if err != nil {
 		return nil, err

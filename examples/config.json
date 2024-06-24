@@ -5,8 +5,7 @@
       "pat": "foobar",
       "repositories": [
         {
-          "name": "fleet-infra",
-          "project": "lab"
+          "name": "fleet-infra"
         }
       ]
     }

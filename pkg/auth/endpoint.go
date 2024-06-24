@@ -9,7 +9,6 @@ type Endpoint struct {
 	scheme       string
 	host         string
 	organization string
-	project      string
 	repository   string
 	regexes      []*regexp.Regexp
 
@@ -19,9 +18,6 @@ type Endpoint struct {
 
 func (e *Endpoint) ID() string {
 	comps := []string{e.host, e.organization}
-	if e.project != "" {
-		comps = append(comps, e.project)
-	}
 	comps = append(comps, e.repository)
 	return strings.Join(comps, "-")
 }

@@ -58,7 +58,6 @@ const validGitHub = `
 }
 `
 
-//nolint:dupl //false positive
 func TestValidGitHub(t *testing.T) {
 	fs, path, err := fsWithContent(validGitHub)
 	require.NoError(t, err)
@@ -75,5 +74,4 @@ func TestValidGitHub(t *testing.T) {
 	require.Equal(t, "xenitab", cfg.Organizations[0].Name)
 	require.NotEmpty(t, cfg.Organizations[0].Repositories)
 	require.Equal(t, "gitops-deployment", cfg.Organizations[0].Repositories[0].Name)
-	require.Equal(t, "", cfg.Organizations[0].Repositories[0].Project)
 }

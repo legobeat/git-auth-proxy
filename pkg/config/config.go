@@ -37,9 +37,6 @@ func (o *Organization) GetSecretName(r *Repository) string {
 	}
 
 	comps := []string{o.Name}
-	if r.Project != "" {
-		comps = append(comps, r.Project)
-	}
 	comps = append(comps, r.Name)
 	return strings.Join(comps, "-")
 }
@@ -51,7 +48,6 @@ type GitHub struct {
 }
 
 type Repository struct {
-	Project            string `json:"project"`
 	Name               string `json:"name" validate:"required"`
 	SecretNameOverride string `json:"secretNameOverride,omitempty"`
 }
