@@ -12,12 +12,10 @@ type Endpoint struct {
 	repository   string
 	regexes      []*regexp.Regexp
 
-	Token      string
-	SecretName string
+	TokenHash string
 }
 
 func (e *Endpoint) ID() string {
-	comps := []string{e.host, e.organization}
-	comps = append(comps, e.repository)
+	comps := []string{e.host, e.organization, e.repository}
 	return strings.Join(comps, "-")
 }

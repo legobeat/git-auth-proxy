@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -19,31 +18,25 @@ type Provider interface {
 }
 
 type Authorizer struct {
-	providers        map[string]Provider
-	endpoints        []*Endpoint
-	endpointsByID    map[string]*Endpoint
-	endpointsByToken map[string]*Endpoint
+	providers            map[string]Provider
+	endpoints            []*Endpoint
+	endpointsByID        map[string]*Endpoint
+	endpointsByTokenHash map[string]*Endpoint
 }
 
 func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 	providers := map[string]Provider{}
 	endpoints := []*Endpoint{}
 	endpointsByID := map[string]*Endpoint{}
-	endpointsByToken := map[string]*Endpoint{}
+	endpointsByTokenHash := map[string]*Endpoint{}
 
 	for _, o := range cfg.Organizations {
 		// Get the correct provider for the organization
 		var provider Provider
 		switch o.Provider {
 		case config.GitHubProviderType:
-			pemData, err := b64.URLEncoding.DecodeString(o.GitHub.PrivateKey)
-			if err != nil {
-				return nil, err
-			}
-			provider, err = newGithub(o.GitHub.AppID, o.GitHub.InstallationID, pemData)
-			if err != nil {
-				return nil, err
-			}
+			ghToken := o.GitHub.Token
+			provider = newGithub(ghToken)
 		default:
 			return nil, fmt.Errorf("invalid provider type %s", o.Provider)
 		}
@@ -55,33 +48,27 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				return nil, fmt.Errorf("could not get path regex: %w", err)
 			}
 
-			token, err := randomSecureToken()
-			if err != nil {
-				return nil, fmt.Errorf("could not generate random token: %w", err)
-			}
-
 			e := &Endpoint{
 				host:         o.Host,
 				scheme:       o.Scheme,
 				organization: o.Name,
 				repository:   r.Name,
 				regexes:      pathRegex,
-				Token:        token,
-				SecretName:   o.GetSecretName(r),
+				TokenHash:    o.UserAuth.TokenHash,
 			}
 
 			providers[e.ID()] = provider
 			endpoints = append(endpoints, e)
 			endpointsByID[e.ID()] = e
-			endpointsByToken[e.Token] = e
+			endpointsByTokenHash[o.UserAuth.TokenHash] = e
 		}
 	}
 
 	authz := &Authorizer{
-		providers:        providers,
-		endpoints:        endpoints,
-		endpointsByID:    endpointsByID,
-		endpointsByToken: endpointsByToken,
+		providers:            providers,
+		endpoints:            endpoints,
+		endpointsByID:        endpointsByID,
+		endpointsByTokenHash: endpointsByTokenHash,
 	}
 	return authz, nil
 }
@@ -98,8 +85,13 @@ func (a *Authorizer) GetEndpointById(id string) (*Endpoint, error) {
 	return e, nil
 }
 
-func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
-	e, ok := a.endpointsByToken[token]
+func hashToken(token string) string {
+	// TODO
+	return token
+}
+
+func (a *Authorizer) GetEndpointByTokenHash(tokenHash string) (*Endpoint, error) {
+	e, ok := a.endpointsByTokenHash[tokenHash]
 	if !ok {
 		return nil, fmt.Errorf("endpoint not found for given token")
 	}
@@ -107,7 +99,8 @@ func (a *Authorizer) GetEndpointByToken(token string) (*Endpoint, error) {
 }
 
 func (a *Authorizer) IsPermitted(path string, token string) error {
-	e, err := a.GetEndpointByToken(token)
+	tokenHash := hashToken(token)
+	e, err := a.GetEndpointByTokenHash(tokenHash)
 	if err != nil {
 		return err
 	}
@@ -120,7 +113,8 @@ func (a *Authorizer) IsPermitted(path string, token string) error {
 }
 
 func (a *Authorizer) UpdateRequest(ctx context.Context, req *http.Request, token string) (*http.Request, *url.URL, error) {
-	e, err := a.GetEndpointByToken(token)
+	tokenHash := hashToken(token)
+	e, err := a.GetEndpointByTokenHash(tokenHash)
 	if err != nil {
 		return nil, nil, err
 	}

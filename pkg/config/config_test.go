@@ -42,9 +42,7 @@ const validGitHub = `
 		{
       "provider": "github",
 			"github": {
-        "appID": 123,
-        "installationID": 123,
-        "privateKey": "foobar"
+        "token": "foobar"
       },
 			"host": "github.com",
 			"name": "xenitab",
@@ -66,9 +64,7 @@ func TestValidGitHub(t *testing.T) {
 
 	require.NotEmpty(t, cfg.Organizations)
 	require.Equal(t, "github", string(cfg.Organizations[0].Provider))
-	require.Equal(t, int64(123), cfg.Organizations[0].GitHub.AppID)
-	require.Equal(t, int64(123), cfg.Organizations[0].GitHub.InstallationID)
-	require.Equal(t, "foobar", cfg.Organizations[0].GitHub.PrivateKey)
+	require.Equal(t, "foobar", cfg.Organizations[0].GitHub.Token)
 	require.Equal(t, "github.com", cfg.Organizations[0].Host)
 	require.Equal(t, "https", cfg.Organizations[0].Scheme)
 	require.Equal(t, "xenitab", cfg.Organizations[0].Name)
