@@ -49,8 +49,7 @@ const validAzureDevOps = `
 			"repositories": [
 				{
 					"project": "Lab",
-					"name": "gitops-deployment",
-					"namespaces": ["foo"]
+					"name": "gitops-deployment"
 				}
 			]
 		}
@@ -93,8 +92,7 @@ const validGitHub = `
 			"name": "xenitab",
 			"repositories": [
 				{
-					"name": "gitops-deployment",
-					"namespaces": ["foo"]
+					"name": "gitops-deployment"
 				}
 			]
 		}

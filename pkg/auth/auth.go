@@ -70,7 +70,6 @@ func NewAuthorizer(cfg *config.Configuration) (*Authorizer, error) {
 				repository:   r.Name,
 				regexes:      pathRegex,
 				Token:        token,
-				Namespaces:   r.Namespaces,
 				SecretName:   o.GetSecretName(r),
 			}
 

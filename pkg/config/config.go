@@ -38,8 +38,7 @@ func (o *Organization) GetSecretName(r *Repository) string {
 		return r.SecretNameOverride
 	}
 
-	comps := []string{}
-	comps = append(comps, o.Name)
+	comps := []string{o.Name}
 	if r.Project != "" {
 		comps = append(comps, r.Project)
 	}
@@ -58,10 +57,9 @@ type GitHub struct {
 }
 
 type Repository struct {
-	Project            string   `json:"project"`
-	Name               string   `json:"name" validate:"required"`
-	Namespaces         []string `json:"namespaces" validate:"required"`
-	SecretNameOverride string   `json:"secretNameOverride,omitempty"`
+	Project            string `json:"project"`
+	Name               string `json:"name" validate:"required"`
+	SecretNameOverride string `json:"secretNameOverride,omitempty"`
 }
 
 func setConfigurationDefaults(cfg *Configuration) *Configuration {

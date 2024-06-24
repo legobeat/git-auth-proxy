@@ -5,6 +5,9 @@ assets:
 	draw.io -b 10 -x -f png -p 0 -o assets/architecture.png assets/diagram.drawio
 .PHONY: assets
 
+build:
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o git-auth-proxy .
+
 lint:
 	golangci-lint run ./...
 
@@ -22,9 +25,6 @@ run: fmt vet
 
 docker-build:
 	docker build -t ${IMG} .
-
-kind-load:
-	kind load docker-image $(IMG)
 
 e2e: docker-build kind-load
 	./e2e/e2e.sh $(TAG)

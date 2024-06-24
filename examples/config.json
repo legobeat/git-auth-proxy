@@ -6,11 +6,7 @@
       "repositories": [
         {
           "name": "fleet-infra",
-          "project": "lab",
-          "namespaces": [
-            "foo",
-            "bar"
-          ]
+          "project": "lab"
         }
       ]
     }
