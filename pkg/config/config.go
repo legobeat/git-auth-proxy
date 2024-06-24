@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	defaultScheme  = "https"
-	standardGitHub = "github.com"
+	defaultScheme      = "https"
+	standardGitHub     = "github.com"
 	GitHubProviderType = "github"
 )
 
