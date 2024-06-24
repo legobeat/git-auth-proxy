@@ -7,13 +7,13 @@ toolchain go1.22.4
 require (
 	github.com/alexflint/go-arg v1.4.3
 	github.com/gin-gonic/gin v1.9.0
-	github.com/go-crypt/crypt v0.2.24
+	github.com/go-crypt/crypt v0.2.18
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.3
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/spf13/afero v1.9.5
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.8.4
 	github.com/xenitab/pkg/gin v0.0.9
 	go.uber.org/zap v1.24.0
 	golang.org/x/sync v0.1.0
@@ -27,7 +27,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-crypt/x v0.2.17 // indirect
+	github.com/go-crypt/x v0.2.12 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
@@ -46,9 +46,12 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/slok/go-http-metrics v0.10.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/goleak v1.3.0 // indirect
+	go.uber.org/mock v0.4.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
