@@ -159,6 +159,7 @@ func (a *Authorizer) IsPermitted(path string, token string) error {
 }
 
 func (a *Authorizer) UpdateRequest(ctx context.Context, req *http.Request, token string) (*http.Request, *url.URL, error) {
+	req.Header.Del("Authorization")
 	e, err := a.GetEndpointByToken(token)
 	if err != nil {
 		return nil, nil, err
@@ -170,10 +171,6 @@ func (a *Authorizer) UpdateRequest(ctx context.Context, req *http.Request, token
 
 	host := provider.getHost(e, req.URL.Path)
 	path := provider.getPath(e, req.URL.Path)
-	authorizationHeader, err := provider.getAuthorizationHeader(ctx, req.URL.Path)
-	if err != nil {
-		return nil, nil, err
-	}
 	url, err := url.Parse(fmt.Sprintf("%s://%s", e.scheme, host))
 	if err != nil {
 		return nil, nil, fmt.Errorf("invalid url format: %w", err)
@@ -181,7 +178,13 @@ func (a *Authorizer) UpdateRequest(ctx context.Context, req *http.Request, token
 
 	req.Host = host
 	req.URL.Path = path
-	req.Header.Del("Authorization")
-	req.Header.Add("Authorization", authorizationHeader)
+
+	authorizationHeader, err := provider.getAuthorizationHeader(ctx, req.URL.Path)
+	if err != nil {
+		return nil, nil, err
+	}
+	if authorizationHeader != "" {
+		req.Header.Add("Authorization", authorizationHeader)
+	}
 	return req, url, nil
 }
