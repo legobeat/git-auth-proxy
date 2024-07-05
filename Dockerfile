@@ -1,4 +1,4 @@
-FROM golang:1.22 as builder
+FROM docker.io/golang:1.22 as builder
 RUN mkdir /build
 WORKDIR /build
 ARG GOPROXY="https://goproxy.io,https://proxy.golang.org,direct"
