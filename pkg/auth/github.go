@@ -67,6 +67,9 @@ func (g *github) getAuthorizationHeader(ctx context.Context, path string) (strin
 	if err != nil {
 		return "", fmt.Errorf("error when fetching GitHub token: %w", err)
 	}
+	if token == "" {
+		return "", nil
+	}
 
 	if strings.HasPrefix(path, "/api/v3/") {
 		return fmt.Sprintf("Bearer %s", token), nil
